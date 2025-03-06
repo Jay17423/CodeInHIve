@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import io from "socket.io-client";
 import Editor from "@monaco-editor/react";
+import AskAi from "./Components/AskAi";
 
 const socket = io("http://localhost:5050");
 
@@ -14,8 +15,9 @@ const App = () => {
   const [copySuccess, setCopySuccess] = useState("");
   const [users, setUsers] = useState([]);
   const [typing, setTyping] = useState("");
-  const [output,setOutput] = useState(""); 
+  const [output, setOutput] = useState("");
   const [version, setVersion] = useState("*");
+  const [showAskAi, setShowAskAi] = useState(false); // State to control AskAi visibility
 
   useEffect(() => {
     socket.on("userJoined", (users) => {
@@ -25,18 +27,18 @@ const App = () => {
       setCode(newCode);
     });
 
-    socket.on("userTyping",(user) =>{
-      setTyping(`${user.slice(0,8)}... is typing...`);
-      setTimeout(()=> setTyping(""),2000);
-    })
+    socket.on("userTyping", (user) => {
+      setTyping(`${user.slice(0, 8)}... is typing...`);
+      setTimeout(() => setTyping(""), 2000);
+    });
 
-    socket.on("languageUpdate",(newLanguage) => {
+    socket.on("languageUpdate", (newLanguage) => {
       setLanguage(newLanguage);
-    })
+    });
 
     socket.on("codeResponse", (response) => {
       setOutput(response.run.output);
-    })
+    });
 
     return () => {
       socket.off("userJoined");
@@ -56,6 +58,7 @@ const App = () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
+
   const joinRoom = () => {
     if (roomId && userName) {
       socket.emit("join", { roomId, userName });
@@ -70,7 +73,7 @@ const App = () => {
     setUserName("");
     setCode("//Start code here");
     setLanguage("javascript");
-  }
+  };
 
   const copyRoomId = () => {
     navigator.clipboard.writeText(roomId);
@@ -86,15 +89,19 @@ const App = () => {
     socket.emit("userTyping", { roomId, userName });
   };
 
-  const handleLanguageChange = e =>{
+  const handleLanguageChange = (e) => {
     const newLanguage = e.target.value;
     setLanguage(newLanguage);
-    socket.emit("languageChange",{roomId,language:newLanguage});
-  }
+    socket.emit("languageChange", { roomId, language: newLanguage });
+  };
 
-  const runCode = () =>{
-    socket.emit("compileCode",{code,language,roomId,version});
-  }
+  const runCode = () => {
+    socket.emit("compileCode", { code, language, roomId, version });
+  };
+
+  const toggleAskAi = () => {
+    setShowAskAi(!showAskAi); // Toggle AskAi visibility
+  };
 
   if (!joined) {
     return (
@@ -124,34 +131,42 @@ const App = () => {
       <div className="sidebar">
         <div className="room-info">
           <h2>Room Id: {roomId}</h2>
-          <button onClick={copyRoomId} className="copy-button">
-            Copy Id
-          </button>
-          {copySuccess && <span className="copy-success">{copySuccess}</span>}
+          <select
+            className="language-selector"
+            value={language}
+            onChange={handleLanguageChange}
+          >
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+            <option value="c">C</option>
+          </select>
         </div>
-        <h3>Users in Room:</h3>
+        <h3 className="room-title">Members in Room:{"  "}{users.length}</h3>
         <ul>
           {users.map((user, index) => (
-            <li key={index}>{user.slice(0, 10)}...</li>
+            <li key={index}>{user.slice(0, 20)}</li>
           ))}
         </ul>
         <p className="typing-indicator">{typing}</p>
-        <select
-          className="language-selector"
-          value={language}
-          onChange={handleLanguageChange}
-        >
-          <option value="javascript">JavaScript</option>
-          <option value="python">python</option>
-          <option value="java">java</option>
-          <option value="cpp">C++</option>
-        </select>
-        
-        <button className="leave-button" onClick={leaveRoom}>Leave Room</button>
+
+        <button onClick={copyRoomId} className="copy-button">
+          Copy Room Id
+        </button>
+        {copySuccess && <span className="copy-success">{copySuccess}</span>}
+        <button className="leave-button" onClick={leaveRoom}>
+          Leave Room
+        </button>
       </div>
       <div className="editor-wrapper">
+        <div className="editor-header">
+          <button className="ask-ai-button" onClick={toggleAskAi}>
+            Ask AI
+          </button>
+        </div>
         <Editor
-          height={"60%"}
+          height={"70%"}
           defaultLanguage={language}
           language={language}
           value={code}
@@ -164,9 +179,19 @@ const App = () => {
             fontSize: 16,
           }}
         />
-        <button className="run-btn"  onClick={runCode}>Execute</button>
-        <textarea className="output-console" value = {output} readOnly placeholder="Output will apprear here"/>
+        <div className="run-container">
+          <button className="run-btn" onClick={runCode}>
+            Execute
+          </button>
+          <textarea
+            className="output-console"
+            value={output}
+            readOnly
+            placeholder="Output will appear here"
+          />
+        </div>
       </div>
+      {showAskAi && <AskAi />} {/* Render the AskAi component conditionally */}
     </div>
   );
 };
