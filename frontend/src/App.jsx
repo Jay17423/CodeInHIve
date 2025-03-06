@@ -13,32 +13,38 @@ const App = () => {
   const [code, setCode] = useState("");
   const [copySuccess, setCopySuccess] = useState("");
   const [users, setUsers] = useState([]);
-
+  const [typing, setTyping] = useState("");
 
   useEffect(() => {
     socket.on("userJoined", (users) => {
       setUsers(users);
     });
-    socket.on("codeUpdate",(newCode) =>{
+    socket.on("codeUpdate", (newCode) => {
       setCode(newCode);
+    });
+
+    socket.on("userTyping",(user) =>{
+      setTyping(`${user.slice(0,8)}... is typing...`);
+      setTimeout(()=> setTyping(""),2000);
     })
-    return ()=>{
+
+    return () => {
       socket.off("userJoined");
       socket.off("codeUpdate");
-    }
-  },[]);
+      socket.off("userTyping");
+    };
+  }, []);
 
-  useEffect(() =>{
+  useEffect(() => {
     const handleBeforeUnload = () => {
       socket.emit("leaveRoom");
-    }
+    };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
-      window.removeEventListener("beforeunload",handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  },[]);
+  }, []);
   const joinRoom = () => {
-    // console.log(roomId, userName);
     if (roomId && userName) {
       socket.emit("join", { roomId, userName });
       setJoined(true);
@@ -56,7 +62,7 @@ const App = () => {
   const handleCodeChange = (newCode) => {
     setCode(newCode);
     socket.emit("codeChange", { roomId, code: newCode });
-
+    socket.emit("userTyping", { roomId, userName });
   };
 
   if (!joined) {
@@ -94,11 +100,11 @@ const App = () => {
         </div>
         <h3>Users in Room:</h3>
         <ul>
-        {users.map((user,index) => (
-          <li key={index}>{user.slice(0, 10)}...</li>
-        ))}
+          {users.map((user, index) => (
+            <li key={index}>{user.slice(0, 10)}...</li>
+          ))}
         </ul>
-        <p className="typing-indicator">user Typing...</p>
+        <p className="typing-indicator">{typing}</p>
         <select
           className="language-selector"
           value={language}
