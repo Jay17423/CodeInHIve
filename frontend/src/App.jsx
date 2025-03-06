@@ -1,13 +1,64 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import io from "socket.io-client";
+import Editor from "@monaco-editor/react";
 
-const soket = io("http://localhost:5050");
+const socket = io("http://localhost:5050");
 
 const App = () => {
   const [joined, setJoined] = useState(false);
-  const [roomId, setRoomId] = useState(null);
-  const [userName, setUserName] = useState(null);
+  const [roomId, setRoomId] = useState("");
+  const [userName, setUserName] = useState("");
+  const [language, setLanguage] = useState("javascript");
+  const [code, setCode] = useState("");
+  const [copySuccess, setCopySuccess] = useState("");
+  const [users, setUsers] = useState([]);
+
+
+  useEffect(() => {
+    socket.on("userJoined", (users) => {
+      setUsers(users);
+    });
+    socket.on("codeUpdate",(newCode) =>{
+      setCode(newCode);
+    })
+    return ()=>{
+      socket.off("userJoined");
+      socket.off("codeUpdate");
+    }
+  },[]);
+
+  useEffect(() =>{
+    const handleBeforeUnload = () => {
+      socket.emit("leaveRoom");
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload",handleBeforeUnload);
+    };
+  },[]);
+  const joinRoom = () => {
+    // console.log(roomId, userName);
+    if (roomId && userName) {
+      socket.emit("join", { roomId, userName });
+      setJoined(true);
+    }
+  };
+
+  const copyRoomId = () => {
+    navigator.clipboard.writeText(roomId);
+    setCopySuccess("Copied!");
+    setTimeout(() => {
+      setCopySuccess("");
+    }, 2000);
+  };
+
+  const handleCodeChange = (newCode) => {
+    setCode(newCode);
+    socket.emit("codeChange", { roomId, code: newCode });
+
+  };
+
   if (!joined) {
     return (
       <div className="join-container">
@@ -23,15 +74,61 @@ const App = () => {
             type="text"
             placeholder="Your Name"
             value={userName}
-            onChange={(e) => setRoomId(e.target.value)}
+            onChange={(e) => setUserName(e.target.value)}
           ></input>
-          <button>Join Room</button>
+          <button onClick={joinRoom}>Join Room</button>
         </div>
       </div>
     );
   }
 
-  return <div>User Joined</div>;
+  return (
+    <div className="editor-container">
+      <div className="sidebar">
+        <div className="room-info">
+          <h2>Room Id: {roomId}</h2>
+          <button onClick={copyRoomId} className="copy-button">
+            Copy Id
+          </button>
+          {copySuccess && <span className="copy-success">{copySuccess}</span>}
+        </div>
+        <h3>Users in Room:</h3>
+        <ul>
+        {users.map((user,index) => (
+          <li key={index}>{user.slice(0, 10)}...</li>
+        ))}
+        </ul>
+        <p className="typing-indicator">user Typing...</p>
+        <select
+          className="language-selector"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+        >
+          <option value="javascript">JavaScript</option>
+          <option value="python">python</option>
+          <option value="java">java</option>
+          <option value="cpp">C++</option>
+        </select>
+        <button className="leave-button">Leave Room</button>
+      </div>
+      <div className="editor-wrapper">
+        <Editor
+          height={"100%"}
+          defaultLanguage={language}
+          language={language}
+          value={code}
+          onChange={handleCodeChange}
+          theme="vs-dark"
+          options={{
+            minimap: {
+              enabled: false,
+            },
+            fontSize: 16,
+          }}
+        />
+      </div>
+    </div>
+  );
 };
 
 export default App;
