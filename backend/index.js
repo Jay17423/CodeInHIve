@@ -1,3 +1,4 @@
+import axios from "axios";
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
@@ -35,14 +36,14 @@ io.on("connection", (socket) => {
     rooms.get(roomId).add(userName);
     io.to(roomId).emit("userJoined", Array.from(rooms.get(currentRoom)));
   });
-  socket.on("codeChange", ({roomId,code}) => {
-    socket.to(roomId).emit("codeUpdate",code);
+  socket.on("codeChange", ({ roomId, code }) => {
+    socket.to(roomId).emit("codeUpdate", code);
   });
 
-  socket.on("leaveRoom",() => {
-    if(currentRoom && currentUser){
+  socket.on("leaveRoom", () => {
+    if (currentRoom && currentUser) {
       rooms.get(currentRoom).delete(currentUser);
-      io.to(currentRoom).emit("userJoined",Array.from(rooms.get(currentRoom)));
+      io.to(currentRoom).emit("userJoined", Array.from(rooms.get(currentRoom)));
 
       socket.leave(currentRoom);
       currentRoom = null;
@@ -50,23 +51,41 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("userTyping",({roomId,userName}) =>{
-    socket.to(roomId).emit("userTyping",userName);
-  })
+  socket.on("userTyping", ({ roomId, userName }) => {
+    socket.to(roomId).emit("userTyping", userName);
+  });
 
-  socket.on("languageChange",({roomId,language}) => {
-    io.to(roomId).emit("languageUpdate",language);
-  })
-  socket.on("disconnect",() =>{
-    if(currentRoom && currentUser){
+  socket.on("languageChange", ({ roomId, language }) => {
+    io.to(roomId).emit("languageUpdate", language);
+  });
+
+  socket.on("compileCode", async ({ code, roomId, language, version }) => {
+    if (rooms.has(roomId)) {
+      const room = rooms.get(roomId);
+      const response = await axios.post(
+        "https://emkc.org/api/v2/piston/execute",
+        {
+          language,
+          version,
+          files: [
+            {
+              content:code,
+            }
+          ],
+        });
+
+        room.output = response.data.run.output;
+        io.to(roomId).emit("codeResponse", response.data);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    if (currentRoom && currentUser) {
       rooms.get(currentRoom).delete(currentUser);
-      io.to(currentRoom).emit("userJoined",Array.from(rooms.get(currentRoom)));
+      io.to(currentRoom).emit("userJoined", Array.from(rooms.get(currentRoom)));
     }
     console.log("User Disconnected", socket.id);
-    
-  })
-  
-
+  });
 });
 
 const port = process.env.PORT || 5050;
