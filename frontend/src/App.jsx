@@ -10,7 +10,7 @@ const App = () => {
   const [roomId, setRoomId] = useState("");
   const [userName, setUserName] = useState("");
   const [language, setLanguage] = useState("javascript");
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState("//Start code here");
   const [copySuccess, setCopySuccess] = useState("");
   const [users, setUsers] = useState([]);
   const [typing, setTyping] = useState("");
@@ -28,10 +28,15 @@ const App = () => {
       setTimeout(()=> setTyping(""),2000);
     })
 
+    socket.on("languageUpdate",(newLanguage) => {
+      setLanguage(newLanguage);
+    })
+
     return () => {
       socket.off("userJoined");
       socket.off("codeUpdate");
       socket.off("userTyping");
+      socket.off("languageUpdate");
     };
   }, []);
 
@@ -51,6 +56,15 @@ const App = () => {
     }
   };
 
+  const leaveRoom = () => {
+    socket.emit("leaveRoom");
+    setJoined(false);
+    setRoomId("");
+    setUserName("");
+    setCode("//Start code here");
+    setLanguage("javascript");
+  }
+
   const copyRoomId = () => {
     navigator.clipboard.writeText(roomId);
     setCopySuccess("Copied!");
@@ -64,6 +78,12 @@ const App = () => {
     socket.emit("codeChange", { roomId, code: newCode });
     socket.emit("userTyping", { roomId, userName });
   };
+
+  const handleLanguageChange = e =>{
+    const newLanguage = e.target.value;
+    setLanguage(newLanguage);
+    socket.emit("languageChange",{roomId,language:newLanguage});
+  }
 
   if (!joined) {
     return (
@@ -108,14 +128,14 @@ const App = () => {
         <select
           className="language-selector"
           value={language}
-          onChange={(e) => setLanguage(e.target.value)}
+          onChange={handleLanguageChange}
         >
           <option value="javascript">JavaScript</option>
           <option value="python">python</option>
           <option value="java">java</option>
           <option value="cpp">C++</option>
         </select>
-        <button className="leave-button">Leave Room</button>
+        <button className="leave-button" onClick={leaveRoom}>Leave Room</button>
       </div>
       <div className="editor-wrapper">
         <Editor
