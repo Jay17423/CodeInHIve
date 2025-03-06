@@ -1,7 +1,7 @@
-# CodeHive
+# CodeInHive
 
 ## Project name  
-CodeHive.  
+CodeInHive.  
 
 # In FrontEnd  
 React.js.  
