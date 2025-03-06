@@ -17,7 +17,8 @@ const App = () => {
   const [typing, setTyping] = useState("");
   const [output, setOutput] = useState("");
   const [version, setVersion] = useState("*");
-  const [showAskAi, setShowAskAi] = useState(false); // State to control AskAi visibility
+  const [showAskAi, setShowAskAi] = useState(false); 
+  const [aiResponse, setAiResponse] = useState({ question: "", response: "" });
 
   useEffect(() => {
     socket.on("userJoined", (users) => {
@@ -48,7 +49,16 @@ const App = () => {
       socket.off("codeResponse");
     };
   }, []);
-
+  
+  useEffect(() => {
+    socket.on("aiResponse", (data) => {
+      setAiResponse(data); // Update the AI response state
+    });
+  
+    return () => {
+      socket.off("aiResponse");
+    };
+  }, []);
   useEffect(() => {
     const handleBeforeUnload = () => {
       socket.emit("leaveRoom");
@@ -64,6 +74,10 @@ const App = () => {
       socket.emit("join", { roomId, userName });
       setJoined(true);
     }
+  };
+
+  const handleAskAI = (question) => {
+    socket.emit("askAI", { roomId, question });
   };
 
   const leaveRoom = () => {
@@ -161,8 +175,8 @@ const App = () => {
       </div>
       <div className="editor-wrapper">
         <div className="editor-header">
-          <button className="ask-ai-button" onClick={toggleAskAi}>
-            Ask AI
+           <button className="ask-ai-button" onClick={toggleAskAi}>
+            {showAskAi ? "Hide" : "Ask AI"}
           </button>
         </div>
         <Editor
@@ -191,7 +205,9 @@ const App = () => {
           />
         </div>
       </div>
-      {showAskAi && <AskAi />} {/* Render the AskAi component conditionally */}
+      {showAskAi && (
+      <AskAi aiResponse={aiResponse} onSendQuestion={handleAskAI} />
+    )}
     </div>
   );
 };

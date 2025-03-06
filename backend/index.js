@@ -79,6 +79,29 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("askAI", async ({ roomId, question }) => {
+    if (rooms.has(roomId)) {
+      try {
+        // Replace this with your actual AI API call
+        const aiResponse = await axios.post("https://api.your-ai-service.com/ask", {
+          question,
+        });
+  
+        // Broadcast the AI response to all users in the room
+        io.to(roomId).emit("aiResponse", {
+          question,
+          response: aiResponse.data.answer,
+        });
+      } catch (error) {
+        console.error("Error calling AI API:", error);
+        io.to(roomId).emit("aiResponse", {
+          question,
+          response: "Failed to get AI response. Please try again.",
+        });
+      }
+    }
+  });
+
   socket.on("disconnect", () => {
     if (currentRoom && currentUser) {
       rooms.get(currentRoom).delete(currentUser);
