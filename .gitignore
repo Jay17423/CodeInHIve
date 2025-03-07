@@ -23,6 +23,7 @@ yarn-error.log*
 .env.development
 .env.production
 .env.test
+backend/.env
 
 # Editor/IDE files
 .vscode/
