@@ -1,9 +1,16 @@
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import axios from "axios";
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
-
+import OpenAI from "openai";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, ".env") });
 const app = express();
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const server = http.createServer(app);
 
@@ -12,6 +19,8 @@ const io = new Server(server, {
     origin: "*",
   },
 });
+
+// console.log("OpenAI Key:", process.env.OPENAI_API_KEY);
 
 const rooms = new Map();
 
@@ -78,22 +87,28 @@ io.on("connection", (socket) => {
         io.to(roomId).emit("codeResponse", response.data);
     }
   });
-
-  socket.on("askAI", async ({ roomId, question }) => {
+  socket.on("askAI", async ({ roomId, question, code }) => {
     if (rooms.has(roomId)) {
       try {
-        // Replace this with your actual AI API call
-        const aiResponse = await axios.post("https://api.your-ai-service.com/ask", {
-          question,
+        const prompt = `
+          You are a coding assistant. A user has written the following code:\n\n
+          "${code}"\n\n
+          They have asked: "${question}".\n
+          Please analyze the code and give responese according to the question asked to you point wise.
+          Also give best practice how to write the code
+        `;
+  
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o-mini", 
+          messages: [{ role: "system", content: prompt }],
         });
   
-        // Broadcast the AI response to all users in the room
         io.to(roomId).emit("aiResponse", {
           question,
-          response: aiResponse.data.answer,
+          response: response.choices[0].message.content,
         });
       } catch (error) {
-        console.error("Error calling AI API:", error);
+        console.error("Error calling OpenAI API:", error);
         io.to(roomId).emit("aiResponse", {
           question,
           response: "Failed to get AI response. Please try again.",
@@ -101,6 +116,7 @@ io.on("connection", (socket) => {
       }
     }
   });
+  
 
   socket.on("disconnect", () => {
     if (currentRoom && currentUser) {

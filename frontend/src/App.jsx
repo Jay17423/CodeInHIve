@@ -20,6 +20,8 @@ const App = () => {
   const [showAskAi, setShowAskAi] = useState(false); 
   const [aiResponse, setAiResponse] = useState({ question: "", response: "" });
 
+  
+
   useEffect(() => {
     socket.on("userJoined", (users) => {
       setUsers(users);
@@ -77,7 +79,7 @@ const App = () => {
   };
 
   const handleAskAI = (question) => {
-    socket.emit("askAI", { roomId, question });
+    socket.emit("askAI", { roomId, question, code });
   };
 
   const leaveRoom = () => {
