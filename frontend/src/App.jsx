@@ -4,32 +4,33 @@ import io from "socket.io-client";
 import Editor from "@monaco-editor/react";
 import AskAi from "./Components/AskAi";
 import Logo from "./assets/logo.png";
+import { useDispatch,useSelector } from "react-redux";
+import { setCode,setLanguage,setRoomId,setVersion } from "./Slice/CodeSlice";
+
 
 const socket = io("http://localhost:5050");
 
 const App = () => {
+  const dispatch = useDispatch(); // Initialize dispatch
+  const { code, language, roomId, version } = useSelector((state) => state.code); // Get state from Redux
   const [joined, setJoined] = useState(false);
-  const [roomId, setRoomId] = useState("");
   const [userName, setUserName] = useState("");
-  const [language, setLanguage] = useState("javascript");
-  const [code, setCode] = useState("//Start code here");
   const [copySuccess, setCopySuccess] = useState("");
-  const [users, setUsers] = useState([]); // Now stores user objects
+  const [users, setUsers] = useState([]);
   const [typing, setTyping] = useState("");
   const [output, setOutput] = useState("");
-  const [version, setVersion] = useState("*");
   const [showAskAi, setShowAskAi] = useState(false);
   const [aiResponse, setAiResponse] = useState({ question: "", response: "" });
 
+
+
   useEffect(() => {
-    // Listen for updated user list when someone joins
     socket.on("userJoined", (users) => {
-      setUsers(users); // users is now an array of objects: [{ id, name }, ...]
+      setUsers(users); 
     });
 
-    // Listen for code updates from other users
     socket.on("codeUpdate", (newCode) => {
-      setCode(newCode);
+      dispatch(setCode(newCode));
     });
 
     // Listen for typing indicators
@@ -40,7 +41,7 @@ const App = () => {
 
     // Listen for language changes
     socket.on("languageUpdate", (newLanguage) => {
-      setLanguage(newLanguage);
+      dispatch(setLanguage(newLanguage));
     });
 
     // Listen for code execution output
@@ -92,10 +93,10 @@ const App = () => {
   const leaveRoom = () => {
     socket.emit("leaveRoom");
     setJoined(false);
-    setRoomId("");
+    dispatch(setRoomId(""));
     setUserName("");
-    setCode("//Start code here");
-    setLanguage("javascript");
+    dispatch(setCode("//Start code here"));
+    dispatch(setLanguage("javascript"));
   };
 
   // Copy the room ID to the clipboard
@@ -109,7 +110,7 @@ const App = () => {
 
   // Handle code changes and broadcast them to the room
   const handleCodeChange = (newCode) => {
-    setCode(newCode);
+    dispatch(setCode(newCode));
     socket.emit("codeChange", { roomId, code: newCode });
     socket.emit("userTyping", { roomId, userName });
   };
@@ -117,7 +118,7 @@ const App = () => {
   // Handle language changes and broadcast them to the room
   const handleLanguageChange = (e) => {
     const newLanguage = e.target.value;
-    setLanguage(newLanguage);
+    dispatch(setLanguage(newLanguage));
     socket.emit("languageChange", { roomId, language: newLanguage });
   };
 
@@ -157,7 +158,7 @@ const App = () => {
             type="text"
             placeholder="Room Id"
             value={roomId}
-            onChange={(e) => setRoomId(e.target.value)}
+            onChange={(e) => dispatch(setRoomId(e.target.value))}
           />
           <input
             type="text"
