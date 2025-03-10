@@ -316,3 +316,24 @@ body {
 
   filter: brightness(0) invert(1); /* Converts black to white */
 }
+
+.download-button {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: rgb(99, 70, 231);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+  
+}
+
+.download-button:hover {
+  background-color: #7c34ce; 
+}
+
+
+

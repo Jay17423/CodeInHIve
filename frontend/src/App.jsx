@@ -131,6 +131,21 @@ const App = () => {
     setShowAskAi(!showAskAi);
   };
 
+  const downloadCode = () => {
+    const blob = new Blob([code], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    if (language === "javascript") a.download = "code.js";
+    else if (language === "python") a.download = "code.py";
+    else if (language === "c") a.download = "code.c";
+    else if (language === "cpp") a.download = "code.cpp";
+    else if (language === "java") a.download = "code.java";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
   // Render the join form if the user hasn't joined a room yet
   if (!joined) {
     return (
@@ -186,11 +201,14 @@ const App = () => {
         <p className="typing-indicator">{typing}</p>
 
         <button onClick={copyRoomId} className="copy-button">
-          Copy Room Id
+        📋 Copy Room ID
         </button>
         {copySuccess && <span className="copy-success">{copySuccess}</span>}
         <button className="leave-button" onClick={leaveRoom}>
-          Leave Room
+        🚪 Leave Room
+        </button>
+        <button className="download-button" onClick={downloadCode}>
+          📥 Download Code
         </button>
       </div>
       <div className="editor-wrapper">
