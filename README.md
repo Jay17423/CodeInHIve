@@ -26,3 +26,12 @@ In backend folder, run:
 - Install **ES7 + React/Redux/React-Native Snippets** from VS Code Extension.  
 - Create `.gitignore`.  
 - Project Completed
+
+#Features To be Added
+- Audio group call Features
+- Persist the code when page is refreshed
+- user can download the code 
+- Stop button to stop the Execution of the code for infinite loop
+- Improve the Ui
+- Create the logo and buttons for better Ui Experience(Done)
+- Dynamic console to take input from the user

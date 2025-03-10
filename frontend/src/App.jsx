@@ -3,6 +3,7 @@ import "./App.css";
 import io from "socket.io-client";
 import Editor from "@monaco-editor/react";
 import AskAi from "./Components/AskAi";
+import Logo from "./assets/logo.png";
 
 const socket = io("http://localhost:5050");
 
@@ -13,54 +14,57 @@ const App = () => {
   const [language, setLanguage] = useState("javascript");
   const [code, setCode] = useState("//Start code here");
   const [copySuccess, setCopySuccess] = useState("");
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState([]); // Now stores user objects
   const [typing, setTyping] = useState("");
   const [output, setOutput] = useState("");
   const [version, setVersion] = useState("*");
-  const [showAskAi, setShowAskAi] = useState(false); 
+  const [showAskAi, setShowAskAi] = useState(false);
   const [aiResponse, setAiResponse] = useState({ question: "", response: "" });
 
-  
-
   useEffect(() => {
+    // Listen for updated user list when someone joins
     socket.on("userJoined", (users) => {
-      setUsers(users);
+      setUsers(users); // users is now an array of objects: [{ id, name }, ...]
     });
+
+    // Listen for code updates from other users
     socket.on("codeUpdate", (newCode) => {
       setCode(newCode);
     });
 
+    // Listen for typing indicators
     socket.on("userTyping", (user) => {
       setTyping(`${user.slice(0, 8)}... is typing...`);
       setTimeout(() => setTyping(""), 2000);
     });
 
+    // Listen for language changes
     socket.on("languageUpdate", (newLanguage) => {
       setLanguage(newLanguage);
     });
 
+    // Listen for code execution output
     socket.on("codeResponse", (response) => {
       setOutput(response.run.output);
     });
 
+    // Listen for AI responses
+    socket.on("aiResponse", (data) => {
+      setAiResponse(data); // Update the AI response state
+    });
+
+    // Cleanup listeners on component unmount
     return () => {
       socket.off("userJoined");
       socket.off("codeUpdate");
       socket.off("userTyping");
       socket.off("languageUpdate");
       socket.off("codeResponse");
-    };
-  }, []);
-  
-  useEffect(() => {
-    socket.on("aiResponse", (data) => {
-      setAiResponse(data); // Update the AI response state
-    });
-  
-    return () => {
       socket.off("aiResponse");
     };
   }, []);
+
+  // Handle leaving the room when the user closes the tab or refreshes
   useEffect(() => {
     const handleBeforeUnload = () => {
       socket.emit("leaveRoom");
@@ -71,6 +75,7 @@ const App = () => {
     };
   }, []);
 
+  // Join a room
   const joinRoom = () => {
     if (roomId && userName) {
       socket.emit("join", { roomId, userName });
@@ -78,10 +83,12 @@ const App = () => {
     }
   };
 
+  // Ask AI for assistance
   const handleAskAI = (question) => {
     socket.emit("askAI", { roomId, question, code });
   };
 
+  // Leave the room
   const leaveRoom = () => {
     socket.emit("leaveRoom");
     setJoined(false);
@@ -91,6 +98,7 @@ const App = () => {
     setLanguage("javascript");
   };
 
+  // Copy the room ID to the clipboard
   const copyRoomId = () => {
     navigator.clipboard.writeText(roomId);
     setCopySuccess("Copied!");
@@ -99,53 +107,61 @@ const App = () => {
     }, 2000);
   };
 
+  // Handle code changes and broadcast them to the room
   const handleCodeChange = (newCode) => {
     setCode(newCode);
     socket.emit("codeChange", { roomId, code: newCode });
     socket.emit("userTyping", { roomId, userName });
   };
 
+  // Handle language changes and broadcast them to the room
   const handleLanguageChange = (e) => {
     const newLanguage = e.target.value;
     setLanguage(newLanguage);
     socket.emit("languageChange", { roomId, language: newLanguage });
   };
 
+  // Execute the code
   const runCode = () => {
     socket.emit("compileCode", { code, language, roomId, version });
   };
 
+  // Toggle the Ask AI component visibility
   const toggleAskAi = () => {
-    setShowAskAi(!showAskAi); // Toggle AskAi visibility
+    setShowAskAi(!showAskAi);
   };
 
+  // Render the join form if the user hasn't joined a room yet
   if (!joined) {
     return (
       <div className="join-container">
         <div className="join-form">
+          <img className="logo" src={Logo}></img>
           <h1>Join Code Room</h1>
           <input
             type="text"
             placeholder="Room Id"
             value={roomId}
             onChange={(e) => setRoomId(e.target.value)}
-          ></input>
+          />
           <input
             type="text"
             placeholder="Your Name"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
-          ></input>
+          />
           <button onClick={joinRoom}>Join Room</button>
         </div>
       </div>
     );
   }
 
+  // Render the main editor interface
   return (
     <div className="editor-container">
       <div className="sidebar">
         <div className="room-info">
+          <img className="logo-dark-mode" src={Logo}></img>
           <h2>Room Id: {roomId}</h2>
           <select
             className="language-selector"
@@ -159,10 +175,12 @@ const App = () => {
             <option value="c">C</option>
           </select>
         </div>
-        <h3 className="room-title">Members in Room:{"  "}{users.length}</h3>
+        <h3 className="room-title">Members in Room: {users.length}</h3>
         <ul>
           {users.map((user, index) => (
-            <li key={index}>{user.slice(0, 20)}</li>
+            <li key={index}>
+              {user.name} (ID: {user.id.slice(0, 6)})
+            </li>
           ))}
         </ul>
         <p className="typing-indicator">{typing}</p>
@@ -177,7 +195,7 @@ const App = () => {
       </div>
       <div className="editor-wrapper">
         <div className="editor-header">
-           <button className="ask-ai-button" onClick={toggleAskAi}>
+          <button className="ask-ai-button" onClick={toggleAskAi}>
             {showAskAi ? "Hide" : "Ask AI"}
           </button>
         </div>
@@ -208,8 +226,8 @@ const App = () => {
         </div>
       </div>
       {showAskAi && (
-      <AskAi aiResponse={aiResponse} onSendQuestion={handleAskAI} />
-    )}
+        <AskAi aiResponse={aiResponse} onSendQuestion={handleAskAI} />
+      )}
     </div>
   );
 };

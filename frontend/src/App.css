@@ -15,6 +15,7 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+
   background: linear-gradient(135deg, #667eea, #764ba2 100%);
 
   .join-form {
@@ -27,7 +28,8 @@ body {
 
     h1 {
       margin-bottom: 1.5rem;
-      color: #333;
+      color: #817d7d;
+      font-size: 1.5rem;
     }
 
     input {
@@ -181,10 +183,9 @@ body {
   font-size: 0.8rem;
 }
 
-.run-container{
+.run-container {
   background: black;
 }
-
 
 .ask-ai-button {
   position: absolute;
@@ -255,15 +256,15 @@ body {
 
 .code-block {
   display: block;
-  background: #282a36; 
+  background: #282a36;
   padding: 8px;
   border-radius: 6px;
   margin: 8px 0;
   white-space: pre-wrap;
   overflow-x: auto;
   font-family: "Courier New", monospace;
-  color: #50fa7b; 
-  border-left: 4px solid #ff79c6; 
+  color: #50fa7b;
+  border-left: 4px solid #ff79c6;
 }
 
 .input-area {
@@ -298,4 +299,20 @@ body {
 
 .send-button:hover {
   background: #50fa7b;
+}
+
+.logo {
+  width: 120%;
+  height: 120%;
+  margin-left: -20px;
+  margin-top: -10px;
+}
+
+.logo-dark-mode {
+  width: 120%;
+  height: 120%;
+  margin-left: -20px;
+  margin-top: -10px;
+
+  filter: brightness(0) invert(1); /* Converts black to white */
 }
