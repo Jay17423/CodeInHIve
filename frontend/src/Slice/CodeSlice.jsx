@@ -6,7 +6,7 @@ const codeSlice = createSlice({
     code: "",
     language: "javascript",
     roomId: "",
-    version: "",
+    version: "*",
   },
   reducers: {
     setCode: (state, action) => {
