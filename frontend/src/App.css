@@ -1,3 +1,4 @@
+
 * {
   margin: 0;
   padding: 0;
@@ -15,29 +16,65 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background: url("./assets/bkc.jpg") no-repeat center center/cover;
+  position: relative;
+  overflow: hidden;
 
-  background: linear-gradient(135deg, #667eea, #764ba2 100%);
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    backdrop-filter: blur(5px); 
+    z-index: 0;
+  }
 
   .join-form {
-    background-color: #f0f2f5;
+    position: relative;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.85); 
     padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     text-align: center;
-    width: 300px;
+    width: 320px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
+    }
+
+    .logo {
+      filter: invert(1); 
+      width: 150px;
+      margin-bottom: 1rem;
+    }
 
     h1 {
       margin-bottom: 1.5rem;
-      color: #817d7d;
-      font-size: 1.5rem;
+      color: white;
+      font-size: 1.6rem;
     }
 
     input {
       width: 100%;
       padding: 0.75rem;
       margin-bottom: 1rem;
-      border-radius: 4px;
+      border-radius: 6px;
+      border: 1px solid #555;
+      background: #222;
+      color: white;
       font-size: 1rem;
+      transition: all 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #4a90e2;
+        box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
+      }
     }
 
     button {
@@ -46,16 +83,20 @@ body {
       background-color: #4a90e2;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 1rem;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+
       &:hover {
         background-color: #357abd;
+        transform: scale(1.05);
       }
     }
   }
 }
+
+
 
 .editor-container {
   display: flex;

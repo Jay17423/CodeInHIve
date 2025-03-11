@@ -1,6 +1,6 @@
-
 import React from "react";
 import Logo from "../assets/logo.png";
+
 const Sidebar = ({
   roomId,
   users,
@@ -16,7 +16,7 @@ const Sidebar = ({
     <div className="sidebar">
       <div className="room-info">
         <img className="logo-dark-mode" src={Logo} alt="Logo" />
-        <h2>Room Id: {roomId}</h2>
+        <h2>Room ID: {roomId}</h2>
         <select
           className="language-selector"
           value={language}
@@ -29,19 +29,24 @@ const Sidebar = ({
           <option value="c">C</option>
         </select>
       </div>
+
       <h3 className="room-title">Members in Room: {users.length}</h3>
-      <ul>
+      <ul className="user-list">
         {users.map((user, index) => (
-          <li key={index}>
-            {user.name} (ID: {user.id.slice(0, 6)})
+          <li key={index} className="user-item">
+            <span className="user-icon">👤</span> {user.name}  
+            <span className="user-id">({user.id.slice(0, 6)})</span>
           </li>
         ))}
       </ul>
+
       <p className="typing-indicator">{typing}</p>
+
       <button onClick={copyRoomId} className="copy-button">
         📋 Copy Room ID
       </button>
       {copySuccess && <span className="copy-success">{copySuccess}</span>}
+
       <button className="leave-button" onClick={leaveRoom}>
         🚪 Leave Room
       </button>

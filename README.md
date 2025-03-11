@@ -29,11 +29,11 @@ In backend folder, run:
 
 #Features To be Added
 - Audio group call Features
-- Persist the code when page is refreshed
+- Persist the code when page is refreshed(DOne)
 - user can download the code (Done)
-- Stop button to stop the Execution of the code for infinite loop
+- Stop button to stop the Execution of the code for infinite loop(Piston Api has already this features that any code runs more thant 3 sec then it automatically stop the code)
 - Improve the Ui
 - Create the logo and buttons for better Ui Experience(Done)
-- Dynamic console to take input from the user
-- Added user refresh and go back warning 
+- Dynamic console to take input from the user(Later)
+- Added user refresh and go back warning (Done)
 - 

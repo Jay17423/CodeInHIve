@@ -102,6 +102,7 @@ io.on("connection", (socket) => {
           ],
         }
       );
+      
 
       // Store the output in the room and broadcast it
       room.output = response.data.run.output;
