@@ -26,6 +26,32 @@ const App = () => {
   const [showAskAi, setShowAskAi] = useState(false);
   const [aiResponse, setAiResponse] = useState({ question: "", response: "" });
 
+  useEffect(() =>{
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "Are you sure you want to leave this page?";
+    };
+
+    const handlePopState = () => {
+      const confirmNavigation = window.confirm(
+        "Are you sure you want to leave this page?"
+      );
+      if (!confirmNavigation) {
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+    };
+    
+
+  },[])
+
 
   useEffect(() => {
     socket.on("userJoined", (users) => {
