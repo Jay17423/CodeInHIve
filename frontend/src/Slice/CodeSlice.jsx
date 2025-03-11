@@ -7,6 +7,7 @@ const codeSlice = createSlice({
     language: "javascript",
     roomId: "",
     version: "*",
+    consoleText: "",
   },
   reducers: {
     setCode: (state, action) => {
@@ -21,9 +22,12 @@ const codeSlice = createSlice({
     setVersion: (state, action) => {
       state.version = action.payload;
     },
+    setConsoleText: (state, action) => {
+      state.consoleText = action.payload;
+    },
   },
 })
 
-export const { setCode, setLanguage, setRoomId, setVersion } = codeSlice.actions;
+export const { setCode, setLanguage, setRoomId, setVersion,setConsoleText } = codeSlice.actions;
 
 export default codeSlice.reducer;

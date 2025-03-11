@@ -10,12 +10,13 @@ import CodeEditor from "./Components/CodeEditor";
 import OutputConsole from "./Components/OutputConsole";
 import AskAi from "./Components/AskAi";
 
-
 const socket = io("http://localhost:5050");
 
 const App = () => {
   const dispatch = useDispatch();
-  const { code, language, roomId, version } = useSelector((state) => state.code);
+  const { code, language, roomId, version } = useSelector(
+    (state) => state.code
+  );
   const [joined, setJoined] = useState(false);
   const [userName, setUserName] = useState("");
   const [copySuccess, setCopySuccess] = useState("");
@@ -24,6 +25,7 @@ const App = () => {
   const [output, setOutput] = useState("");
   const [showAskAi, setShowAskAi] = useState(false);
   const [aiResponse, setAiResponse] = useState({ question: "", response: "" });
+
 
   useEffect(() => {
     socket.on("userJoined", (users) => {
@@ -120,20 +122,30 @@ const App = () => {
   };
 
   const downloadCode = () => {
-    const blob = new Blob([code], { type: "text/plain" });
+    const hardcodedData = `// Room ID: ${roomId}\n // User Name: ${userName}\n`;
+    
+    const finalCode = hardcodedData + code; 
+
+    const blob = new Blob([finalCode], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    if (language === "javascript") a.download = "code.js";
-    else if (language === "python") a.download = "code.py";
-    else if (language === "c") a.download = "code.c";
-    else if (language === "cpp") a.download = "code.cpp";
-    else if (language === "java") a.download = "code.java";
+    const extensions = {
+        javascript: "js",
+        python: "py",
+        c: "c",
+        cpp: "cpp",
+        java: "java",
+    };
+
+    a.download = `code.${extensions[language] || "txt"}`;
+
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
+};
+
 
   if (!joined) {
     return (
@@ -166,7 +178,11 @@ const App = () => {
             {showAskAi ? "Hide" : "Ask AI"}
           </button>
         </div>
-        <CodeEditor language={language} code={code} handleCodeChange={handleCodeChange} />
+        <CodeEditor
+          language={language}
+          code={code}
+          handleCodeChange={handleCodeChange}
+        />
         <div className="run-container">
           <button className="run-btn" onClick={runCode}>
             Execute
@@ -174,7 +190,9 @@ const App = () => {
           <OutputConsole output={output} />
         </div>
       </div>
-      {showAskAi && <AskAi aiResponse={aiResponse} onSendQuestion={handleAskAI} />}
+      {showAskAi && (
+        <AskAi aiResponse={aiResponse} onSendQuestion={handleAskAI} />
+      )}
     </div>
   );
 };

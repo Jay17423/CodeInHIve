@@ -35,3 +35,5 @@ In backend folder, run:
 - Improve the Ui
 - Create the logo and buttons for better Ui Experience(Done)
 - Dynamic console to take input from the user
+- Added user refresh and go back warning 
+- 
