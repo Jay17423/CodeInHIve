@@ -102,7 +102,6 @@ io.on("connection", (socket) => {
           ],
         }
       );
-      
 
       // Store the output in the room and broadcast it
       room.output = response.data.run.output;
@@ -131,6 +130,7 @@ io.on("connection", (socket) => {
         io.to(roomId).emit("aiResponse", {
           question,
           response: response.choices[0].message.content,
+          // console.log(response.choices[0].message.content);
         });
       } catch (error) {
         console.error("Error calling OpenAI API:", error);

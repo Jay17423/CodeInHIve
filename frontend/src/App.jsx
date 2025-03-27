@@ -1,5 +1,5 @@
 // App.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./App.css";
 import io from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +9,7 @@ import Sidebar from "./Components/Sidebar";
 import CodeEditor from "./Components/CodeEditor";
 import OutputConsole from "./Components/OutputConsole";
 import AskAi from "./Components/AskAi";
+import ShimmerUi from "./Components/ShimmerUi";
 
 const socket = io("http://localhost:5050");
 
@@ -25,8 +26,10 @@ const App = () => {
   const [output, setOutput] = useState("");
   const [showAskAi, setShowAskAi] = useState(false);
   const [aiResponse, setAiResponse] = useState({ question: "", response: "" });
+  // console.log(aiResponse);
+  
 
-  useEffect(() =>{
+  useEffect(() => {
     const handleBeforeUnload = (event) => {
       event.preventDefault();
       event.returnValue = "Are you sure you want to leave this page?";
@@ -48,10 +51,7 @@ const App = () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
     };
-    
-
-  },[])
-
+  }, []);
 
   useEffect(() => {
     socket.on("userJoined", (users) => {
@@ -149,19 +149,19 @@ const App = () => {
 
   const downloadCode = () => {
     const hardcodedData = `// Room ID: ${roomId}\n // User Name: ${userName}\n`;
-    
-    const finalCode = hardcodedData + code; 
+
+    const finalCode = hardcodedData + code;
 
     const blob = new Blob([finalCode], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     const extensions = {
-        javascript: "js",
-        python: "py",
-        c: "c",
-        cpp: "cpp",
-        java: "java",
+      javascript: "js",
+      python: "py",
+      c: "c",
+      cpp: "cpp",
+      java: "java",
     };
 
     a.download = `code.${extensions[language] || "txt"}`;
@@ -170,8 +170,7 @@ const App = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-};
-
+  };
 
   if (!joined) {
     return (
@@ -198,6 +197,7 @@ const App = () => {
         language={language}
         handleLanguageChange={handleLanguageChange}
       />
+
       <div className="editor-wrapper">
         <div className="editor-header">
           <button className="ask-ai-button" onClick={toggleAskAi}>

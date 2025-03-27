@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
+import ShimmerUi from "./ShimmerUi";
 
 const AskAi = ({ aiResponse, onSendQuestion }) => {
   const [question, setQuestion] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); // Loading state
 
-  // Update chat history when new AI response comes in
   useEffect(() => {
     if (aiResponse.question || aiResponse.response) {
       setChatHistory((prev) => [...prev, aiResponse]);
+      setIsLoading(false); // Stop loading once response is received
     }
   }, [aiResponse]);
 
@@ -15,6 +17,7 @@ const AskAi = ({ aiResponse, onSendQuestion }) => {
     if (question.trim()) {
       onSendQuestion(question);
       setQuestion("");
+      setIsLoading(true); // Start loading effect
     }
   };
 
@@ -25,9 +28,9 @@ const AskAi = ({ aiResponse, onSendQuestion }) => {
   const formatResponse = (text) => {
     return text.split("\n").map((line, index) => {
       if (line.startsWith("- ") || line.startsWith("* ")) {
-        return <li key={index}>• {line.substring(2)}</li>; 
+        return <li key={index}>• {line.substring(2)}</li>;
       } else if (/^\d+\./.test(line)) {
-        return <li key={index}>{line.replace(/\./, " ")}</li>; 
+        return <li key={index}>{line.replace(/\./, " ")}</li>;
       } else if (line.startsWith("```")) {
         return null;
       } else {
@@ -55,6 +58,9 @@ const AskAi = ({ aiResponse, onSendQuestion }) => {
             </div>
           </div>
         ))}
+
+        {/* Show Shimmer UI when waiting for response */}
+        {isLoading && <ShimmerUi />}
       </div>
 
       <div className="input-area">
