@@ -142,6 +142,14 @@ io.on("connection", (socket) => {
     }
   });
 
+  // chat room
+
+  socket.on("chatMessage", ({ roomId, userName, message }) => {
+  const chatData = { userName, message, timestamp: new Date().toISOString() };
+  io.to(roomId).emit("chatMessage", chatData);
+  });
+
+
   // Listen for disconnection events
   socket.on("disconnect", () => {
     if (currentRoom && currentUser) {
@@ -153,7 +161,13 @@ io.on("connection", (socket) => {
   });
 });
 
+
+
+
+
+
 const port = process.env.PORT || 5000;
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
