@@ -846,3 +846,9 @@ body {
   background: linear-gradient(to right, #d1006d, #5a005a);
   transform: scale(1.05);
 }
+
+.random-room{
+  margin-top: 10px;
+  color: rgb(151, 142, 142);
+  cursor: pointer;
+}
