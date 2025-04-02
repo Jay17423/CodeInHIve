@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Logo from "../assets/logo.png";
 import MemberInfo from "./MemberInfo";
+import { useSelector } from "react-redux";
 
 const Sidebar = ({
   roomId,
@@ -15,9 +16,9 @@ const Sidebar = ({
   toggleChat,
   toggleBoard,
   Board,
-  
 }) => {
   const [showMemberInfo, setShowMemberInfo] = useState(false);
+  const { messages } = useSelector((state) => state.groupChat);
   return (
     <div className="sidebar">
       <div className="room-info">
@@ -66,7 +67,9 @@ const Sidebar = ({
             📥 Download Code
           </button>
           <button className="chatbox-button" onClick={toggleChat}>
-            💬 Chat
+            {messages.length > 0
+              ? `🗨️ Chat (${messages.length})`
+              : "🗨️ Chat"}
           </button>
           <button className="Drawing-button" onClick={toggleBoard}>
             {Board ? "🎨 Stop Drawing" : "🎨 Start Drawing"}

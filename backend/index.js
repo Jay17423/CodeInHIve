@@ -80,42 +80,41 @@ io.on("connection", (socket) => {
   });
 
   // Drawing board events
-  socket.on('drawStart', ({ roomId, x, y }) => {
+  socket.on("drawStart", ({ roomId, x, y }) => {
     if (rooms.has(roomId)) {
-      socket.to(roomId).emit('remoteDrawStart', { x, y });
+      socket.to(roomId).emit("remoteDrawStart", { x, y });
     }
   });
 
-  socket.on('draw', ({ roomId, x, y, color, lineWidth, tool }) => {
+  socket.on("draw", ({ roomId, x, y, color, lineWidth, tool }) => {
     if (rooms.has(roomId)) {
-      socket.to(roomId).emit('remoteDraw', { x, y, color, lineWidth, tool });
+      socket.to(roomId).emit("remoteDraw", { x, y, color, lineWidth, tool });
     }
   });
 
-  socket.on('drawEnd', ({ roomId }) => {
+  socket.on("drawEnd", ({ roomId }) => {
     if (rooms.has(roomId)) {
-      socket.to(roomId).emit('remoteDrawEnd');
+      socket.to(roomId).emit("remoteDrawEnd");
     }
   });
 
-  socket.on('drawClear', ({ roomId }) => {
+  socket.on("drawClear", ({ roomId }) => {
     if (rooms.has(roomId)) {
       // Clear the drawing state for the room
       rooms.get(roomId).drawing = null;
-      socket.to(roomId).emit('remoteDrawClear');
+      socket.to(roomId).emit("remoteDrawClear");
     }
   });
 
-  socket.on('drawUndo', ({ roomId }) => {
+  socket.on("drawUndo", ({ roomId }) => {
     if (rooms.has(roomId)) {
-      io.to(roomId).emit('remoteDrawUndo');
+      io.to(roomId).emit("remoteDrawUndo");
     }
   });
-  
 
-  socket.on('remoteShape', ({ roomId, shape, startX, startY, endX, endY, color, lineWidth }) => {
+  socket.on("remoteShape", ({ roomId, shape, startX, startY, endX, endY, color, lineWidth }) => {
     if (rooms.has(roomId)) {
-      socket.to(roomId).emit('remoteShape', { shape, startX, startY, endX, endY, color, lineWidth });
+      socket.to(roomId).emit("remoteShape", { shape, startX, startY, endX, endY, color, lineWidth });
     }
   });
 
@@ -211,8 +210,6 @@ io.on("connection", (socket) => {
     console.log("User Disconnected", socket.id);
   });
 });
-
-
 
 const port = process.env.PORT || 5000;
 server.listen(port, () => {

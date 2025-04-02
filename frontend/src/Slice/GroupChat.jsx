@@ -4,6 +4,7 @@ const groupChatSlice = createSlice({
   name: "groupChat",
   initialState: {
     messages: [],
+    members: [],
   },
   reducers: {
     addMessage: (state, action) => {
@@ -12,8 +13,11 @@ const groupChatSlice = createSlice({
     clearMessages: (state) => {
       state.messages = [];
     },
+    addMember: (state, action) => {
+      state.members.push(action.payload);
+    },
   },
 });
 
-export const { addMessage, clearMessages } = groupChatSlice.actions;
+export const { addMessage, clearMessages, addMember } = groupChatSlice.actions;
 export default groupChatSlice.reducer;
