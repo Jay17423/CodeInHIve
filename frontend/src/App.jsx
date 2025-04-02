@@ -9,8 +9,9 @@ import Sidebar from "./Components/Sidebar";
 import CodeEditor from "./Components/CodeEditor";
 import OutputConsole from "./Components/OutputConsole";
 import AskAi from "./Components/AskAi";
-import GroupChat from "./Components/GroupChat";
-
+import Chat from "./Components/Chat";
+import { addMessage } from "./Slice/GroupChat";
+import DrawingBoard from "./Components/DrawingBoard";
 
 const socket = io("http://localhost:5050");
 
@@ -27,8 +28,31 @@ const App = () => {
   const [output, setOutput] = useState("");
   const [showAskAi, setShowAskAi] = useState(false);
   const [aiResponse, setAiResponse] = useState({ question: "", response: "" });
-  // console.log(aiResponse);
-  
+  const [messages, setMessages] = useState([]);
+  const [showChat, setShowChat] = useState(false);
+  const [Board, setBoard] = useState(false);
+
+  const toggleChat = () => {
+    setShowChat((prev) => !prev);
+  };
+
+  const toggleBoard = () => {
+    setBoard((prev) => !prev);
+    console.log(Board);
+  };
+
+  useEffect(() => {
+    const handleChatMessage = (chatData) => {
+      dispatch(addMessage(chatData));
+    };
+
+    socket.off("chatMessage"); // ✅ First, remove any existing listener
+    socket.on("chatMessage", handleChatMessage); // ✅ Add a fresh one
+
+    return () => {
+      socket.off("chatMessage", handleChatMessage); // ✅ Proper cleanup
+    };
+  }, []); // ✅ Empty dependency array ensures it runs only once
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -79,7 +103,6 @@ const App = () => {
     socket.on("aiResponse", (data) => {
       setAiResponse(data);
     });
-
 
     return () => {
       socket.off("userJoined");
@@ -189,6 +212,8 @@ const App = () => {
   return (
     <div className="editor-container">
       <Sidebar
+        toggleChat={() => setShowChat(!showChat)}
+        toggleBoard={() => setBoard(!Board)}
         roomId={roomId}
         users={users}
         typing={typing}
@@ -198,31 +223,58 @@ const App = () => {
         downloadCode={downloadCode}
         language={language}
         handleLanguageChange={handleLanguageChange}
+        Board={Board}
       />
-  
+
+      {showChat && (
+        <div className="chat-container chat-visible">
+          <Chat
+            socket={socket}
+            roomId={roomId}
+            userName={userName}
+            messages={messages}
+            setMessages={setMessages}
+            toggleChat={toggleChat}
+          />
+        </div>
+      )}
 
       <div className="editor-wrapper">
+        {Board && (
+          <div className="drawing-board-container-main">
+            <DrawingBoard
+              toggleBoard={toggleBoard}
+              roomId={roomId}
+              socket={socket}
+            />
+          </div>
+        )}
         <div className="editor-header">
           <button className="ask-ai-button" onClick={toggleAskAi}>
             {showAskAi ? "Hide" : "Ask AI"}
           </button>
         </div>
-        <CodeEditor
-          language={language}
-          code={code}
-          handleCodeChange={handleCodeChange}
-        />
+        {!Board && (
+          <CodeEditor
+            language={language}
+            code={code}
+            handleCodeChange={handleCodeChange}
+          />
+        )}
+
         <div className="run-container">
-          <button className="run-btn" onClick={runCode}>
-            Execute
-          </button>
-          <OutputConsole output={output} />
+          {!Board && (
+            <button className="run-btn" onClick={runCode}>
+              Execute
+            </button>
+          )}
+          {!Board && <OutputConsole output={output} />}
         </div>
       </div>
+
       {showAskAi && (
         <AskAi aiResponse={aiResponse} onSendQuestion={handleAskAI} />
       )}
-    
     </div>
   );
 };
