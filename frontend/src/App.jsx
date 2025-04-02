@@ -9,7 +9,8 @@ import Sidebar from "./Components/Sidebar";
 import CodeEditor from "./Components/CodeEditor";
 import OutputConsole from "./Components/OutputConsole";
 import AskAi from "./Components/AskAi";
-import ShimmerUi from "./Components/ShimmerUi";
+import GroupChat from "./Components/GroupChat";
+
 
 const socket = io("http://localhost:5050");
 
@@ -78,6 +79,7 @@ const App = () => {
     socket.on("aiResponse", (data) => {
       setAiResponse(data);
     });
+
 
     return () => {
       socket.off("userJoined");
@@ -197,6 +199,7 @@ const App = () => {
         language={language}
         handleLanguageChange={handleLanguageChange}
       />
+  
 
       <div className="editor-wrapper">
         <div className="editor-header">
@@ -219,6 +222,7 @@ const App = () => {
       {showAskAi && (
         <AskAi aiResponse={aiResponse} onSendQuestion={handleAskAI} />
       )}
+    
     </div>
   );
 };

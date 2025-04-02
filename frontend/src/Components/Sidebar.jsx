@@ -1,5 +1,6 @@
-import React from "react";
+import React, {useState} from "react";
 import Logo from "../assets/logo.png";
+
 
 const Sidebar = ({
   roomId,
@@ -11,6 +12,9 @@ const Sidebar = ({
   downloadCode,
   language,
   handleLanguageChange,
+  toggleChat,
+  toggleBoard,
+  Board,
 }) => {
   return (
     <div className="sidebar">
@@ -34,7 +38,7 @@ const Sidebar = ({
       <ul className="user-list">
         {users.map((user, index) => (
           <li key={index} className="user-item">
-            <span className="user-icon">👤</span> {user.name}  
+            <span className="user-icon">👤</span> {user.name}
             <span className="user-id">({user.id.slice(0, 6)})</span>
           </li>
         ))}
@@ -53,6 +57,15 @@ const Sidebar = ({
       <button className="download-button" onClick={downloadCode}>
         📥 Download Code
       </button>
+
+      {/* Chat Toggle Button */}
+      <button className="chatbox-button" onClick={toggleChat}>
+        💬 Chat
+      </button>
+      <button className="Drawing-button" onClick={toggleBoard}>
+        {Board ? "🎨 Stop Drawing" : "🎨 Start Drawing"}
+      </button>
+      
     </div>
   );
 };
