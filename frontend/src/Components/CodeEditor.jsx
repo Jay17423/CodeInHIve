@@ -3,6 +3,7 @@ import React from "react";
 import Editor from "@monaco-editor/react";
 
 const CodeEditor = ({ language, code, handleCodeChange }) => {
+  
   return (
     <Editor
       height={"70%"}

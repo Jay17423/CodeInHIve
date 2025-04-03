@@ -6,7 +6,7 @@ const JoinRoom = ({ roomId, userName, setRoomId, setUserName, joinRoom }) => {
   const generateRoomId = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let roomId = '';
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       roomId += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return roomId;
@@ -29,7 +29,7 @@ const JoinRoom = ({ roomId, userName, setRoomId, setUserName, joinRoom }) => {
       onChange={(e) => setUserName(e.target.value)}
     />
     <button onClick={joinRoom}>Join Room</button>
-    <p className="random-room" onClick={() => setRoomId(generateRoomId()) } >Generate a Randon Room Id</p>
+    <p className="random-room" onClick={() => setRoomId(generateRoomId()) } >Click to Generate a Randon Room Id</p>
   </div>
 </div>
   );
